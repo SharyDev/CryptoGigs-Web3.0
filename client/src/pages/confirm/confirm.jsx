@@ -1,0 +1,772 @@
+
+
+import React, { useState } from "react";
+import './confirm.scss';
+import { useQuery } from "@tanstack/react-query";
+import newRequest from "../../utils/newRequest";
+import { useNavigate } from "react-router-dom";
+import moment from 'moment';
+import Web3 from 'web3';
+
+const Orders = () => {
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    const navigate = useNavigate();
+    let store;
+    const [count, setCount] = useState();
+  //  const { id } = useParams();
+    
+    const { isLoading, error, data } = useQuery({
+        queryKey: ['proposels'],
+        queryFn: () =>
+                newRequest.get(`/proposel/${currentUser._id}`)
+                .then((res) => {
+                    return res.data;
+                })
+    });
+
+
+    function findMatchingData(sellerId, buyerId) {
+        return data.find(item => {
+            return item.SellerId === sellerId && item.buyerId === buyerId;
+        });
+          }
+
+         
+    const callcontract = async (_SellerId,_desc,_revisions,_deliveryTime,_createdAt,_finePerDay,_price1) => {
+ 
+
+
+        try {
+            if (window.ethereum) {
+              // Connect to MetaMask
+           //  const web3 = new Web3(window.ethereum);
+       //    const web3 = new Web3(`HTTP://127.0.0.1:7545`);
+            const web3 = new Web3(window.ethereum);
+              await window.ethereum.enable();
+    
+              // Deploy contract code here
+              const accounts = await web3.eth.getAccounts();
+              const sender = accounts[0];
+             
+               const contractBytecode ="608060405273f85fc8b23e4af6e2a592f44c8ee195ff59b3178e600260006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055506040516200161438038062001614833981810160405260c08110156200007e57600080fd5b810190808051906020019092919080516040519392919084640100000000821115620000a957600080fd5b83820191506020820185811115620000c057600080fd5b8251866001820283011164010000000082111715620000de57600080fd5b8083526020830192505050908051906020019080838360005b8381101562000114578082015181840152602081019050620000f7565b50505050905090810190601f168015620001425780820380516001836020036101000a031916815260200191505b5060405260200180519060200190929190805190602001909291908051906020019092919080519060200190929190505050336000806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555085600160006101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550346003819055508460049080519060200190620002149291906200023d565b5083600581905550826006819055508160078190555080600881905550505050505050620002f3565b828054600181600116156101000203166002900490600052602060002090601f016020900481019282620002755760008555620002c1565b82601f106200029057805160ff1916838001178555620002c1565b82800160010185558215620002c1579182015b82811115620002c0578251825591602001919060010190620002a3565b5b509050620002d09190620002d4565b5090565b5b80821115620002ef576000816000905550600101620002d5565b5090565b61131180620003036000396000f3fe60806040526004361061010d5760003560e01c806391b7f5ed11610095578063a5585aa111610064578063a5585aa11461067d578063bca7468d146106b8578063beb0a416146106e3578063cdc187c014610724578063d15e096e1461075f57610210565b806391b7f5ed146104cc5780639dfc911714610507578063a035b1fe14610611578063a37dda2c1461063c57610210565b806369668fe9116100dc57806369668fe9146103075780637284e416146103325780637ee0d3a6146103c257806386d1a69f146103ed57806390c3f38f1461040457610210565b8063109e94cf14610215578063224ac0bb146102565780633f43d89414610291578063576f7139146102cc57610210565b366102105760008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614806101b95750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b61020e576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b005b600080fd5b34801561022157600080fd5b5061022a61078a565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561026257600080fd5b5061028f6004803603602081101561027957600080fd5b81019080803590602001909291905050506107ae565b005b34801561029d57600080fd5b506102ca600480360360208110156102b457600080fd5b81019080803590602001909291905050506108b4565b005b3480156102d857600080fd5b50610305600480360360208110156102ef57600080fd5b81019080803590602001909291905050506109ba565b005b34801561031357600080fd5b5061031c610ac0565b6040518082815260200191505060405180910390f35b34801561033e57600080fd5b50610347610ac6565b6040518080602001828103825283818151815260200191508051906020019080838360005b8381101561038757808201518184015260208101905061036c565b50505050905090810190601f1680156103b45780820380516001836020036101000a031916815260200191505b509250505060405180910390f35b3480156103ce57600080fd5b506103d7610b64565b6040518082815260200191505060405180910390f35b3480156103f957600080fd5b50610402610b6a565b005b34801561041057600080fd5b506104ca6004803603602081101561042757600080fd5b810190808035906020019064010000000081111561044457600080fd5b82018360208201111561045657600080fd5b8035906020019184600183028401116401000000008311171561047857600080fd5b91908080601f016020809104026020016040519081016040528093929190818152602001838380828437600081840152601f19601f820116905080830192505050505050509192919290505050610be5565b005b3480156104d857600080fd5b50610505600480360360208110156104ef57600080fd5b8101908080359060200190929190505050610cfb565b005b34801561051357600080fd5b5061051c610e01565b604051808a73ffffffffffffffffffffffffffffffffffffffff1681526020018973ffffffffffffffffffffffffffffffffffffffff1681526020018873ffffffffffffffffffffffffffffffffffffffff16815260200187815260200180602001868152602001858152602001848152602001838152602001828103825287818151815260200191508051906020019080838360005b838110156105ce5780820151818401526020810190506105b3565b50505050905090810190601f1680156105fb5780820380516001836020036101000a031916815260200191505b509a505050505050505050505060405180910390f35b34801561061d57600080fd5b50610626610f40565b6040518082815260200191505060405180910390f35b34801561064857600080fd5b50610651610f46565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561068957600080fd5b506106b6600480360360208110156106a057600080fd5b8101908080359060200190929190505050610f6c565b005b3480156106c457600080fd5b506106cd611072565b6040518082815260200191505060405180910390f35b3480156106ef57600080fd5b506106f8611078565b604051808273ffffffffffffffffffffffffffffffffffffffff16815260200191505060405180910390f35b34801561073057600080fd5b5061075d6004803603602081101561074757600080fd5b810190808035906020019092919050505061109e565b005b34801561076b57600080fd5b506107746111fd565b6040518082815260200191505060405180910390f35b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614806108555750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b6108aa576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060088190555050565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16148061095b5750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b6109b0576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060058190555050565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610a615750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b610ab6576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060068190555050565b60065481565b60048054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610b5c5780601f10610b3157610100808354040283529160200191610b5c565b820191906000526020600020905b815481529060010190602001808311610b3f57829003601f168201915b505050505081565b60085481565b60006003549050600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051600060405180830381858888f19350505050158015610bd9573d6000803e3d6000fd5b50600060038190555050565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610c8c5750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b610ce1576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060049080519060200190610cf7929190611203565b5050565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610da25750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b610df7576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060038190555050565b600080600080606060008060008060008054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff16600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff166003546004600554600654600754600854848054600181600116156101000203166002900480601f016020809104026020016040519081016040528092919081815260200182805460018160011615610100020316600290048015610f1c5780601f10610ef157610100808354040283529160200191610f1c565b820191906000526020600020905b815481529060010190602001808311610eff57829003601f168201915b50505050509450985098509850985098509850985098509850909192939495969798565b60035481565b600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b60008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614806110135750600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b611068576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040180806020018281038252602d8152602001806112af602d913960400191505060405180910390fd5b8060078190555050565b60075481565b600260009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b6000600854820290508047101561111d576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004018080602001828103825260208152602001807f496e73756666696369656e742066756e647320746f20636f7665722066696e6581525060200191505060405180910390fd5b600081905060008054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051600060405180830381858888f19350505050158015611188573d6000803e3d6000fd5b506000479050600160009054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc829081150290604051600060405180830381858888f193505050501580156111f6573d6000803e3d6000fd5b5050505050565b60055481565b828054600181600116156101000203166002900490600052602060002090601f0160209004810192826112395760008555611280565b82601f1061125257805160ff1916838001178555611280565b82800160010185558215611280579182015b8281111561127f578251825591602001919060010190611264565b5b50905061128d9190611291565b5090565b5b808211156112aa576000816000905550600101611292565b509056fe4f6e6c7920636c69656e74206f7220776562736974652063616e2063616c6c20746869732066756e6374696f6ea2646970667358221220f82d35de34dfc2f80057b66b51682942290bdbfa6f2abadef06732ec31374e9b64736f6c63430007060033"
+                     const contract = new web3.eth.Contract([
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_lateDays",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "distributeFine",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "release",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_deliveryDate",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setDeliveryDate",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_deployDate",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setDeployDate",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "string",
+                            "name": "_description",
+                            "type": "string"
+                        }
+                    ],
+                    "name": "setDescription",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_finePerDay",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setFinePerDay",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_price",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setPrice",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "_revisions",
+                            "type": "uint256"
+                        }
+                    ],
+                    "name": "setRevisions",
+                    "outputs": [],
+                    "stateMutability": "nonpayable",
+                    "type": "function"
+                },
+                {
+                    "inputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "_freelancer",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "_description",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_revisions",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_deployDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_deliveryDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_finePerDay",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "payable",
+                    "type": "constructor"
+                },
+                {
+                    "stateMutability": "payable",
+                    "type": "receive"
+                },
+                {
+                    "inputs": [],
+                    "name": "client",
+                    "outputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "deliveryDate",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "deployDate",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "description",
+                    "outputs": [
+                        {
+                            "internalType": "string",
+                            "name": "",
+                            "type": "string"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "finePerDay",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "freelancer",
+                    "outputs": [
+                        {
+                            "internalType": "address payable",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "getContractDetails",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "_client",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "_freelancer",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "address",
+                            "name": "_website",
+                            "type": "address"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_price",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "string",
+                            "name": "_description",
+                            "type": "string"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_revisions",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_deployDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_deliveryDate",
+                            "type": "uint256"
+                        },
+                        {
+                            "internalType": "uint256",
+                            "name": "_finePerDay",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "price",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "revisions",
+                    "outputs": [
+                        {
+                            "internalType": "uint256",
+                            "name": "",
+                            "type": "uint256"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                },
+                {
+                    "inputs": [],
+                    "name": "website",
+                    "outputs": [
+                        {
+                            "internalType": "address",
+                            "name": "",
+                            "type": "address"
+                        }
+                    ],
+                    "stateMutability": "view",
+                    "type": "function"
+                }
+            ]);
+            console.log(_SellerId);
+              const freelancerAddress=_SellerId;
+              let description =_desc;
+              let revisions =2;
+              let deployDate= Math.floor(Date.now() / 1000);
+              let deliveryDate=parseInt(_deliveryTime, 10);
+              let finePerDay=parseInt(_finePerDay, 10);
+              const priceInWei =web3.utils.toWei(_price1, 'ether');;
+    
+              const deployedContract = await contract.deploy({
+                  data: contractBytecode,
+                  arguments: [freelancerAddress, description, revisions, deployDate, deliveryDate, finePerDay],
+                }).send({
+                  from: sender,
+                  gas: 4700000,
+                  value: priceInWei,
+                });
+                store=deployedContract.options.address;
+            setCount(deployedContract.options.address);
+              console.log("Contract deployed at address:", deployedContract.options.address);
+            } else {
+              console.error("Web3 not found. Please install MetaMask.");
+            }
+          } catch (error) {
+            console.error("Failed to deploy contract:", error);
+            alert("somthing went wrong");
+            return  false;
+          }
+
+
+    }
+
+
+    // const callcontract = async (_SellerId, _desc, _deliveryTime, _createdAt, _price) => {
+    //     console.log("Running contract deployment script...");
+    
+    //     try {
+    //         if (window.ethereum) {
+    //             const web3 = new Web3(window.ethereum);
+    //             await window.ethereum.request({ method: 'eth_requestAccounts' }); // Modern MetaMask connection method
+    
+    //             const accounts = await web3.eth.getAccounts();
+    //             const sender = accounts[0];
+    //             const contractBytecode = "608060405273f85fc8b23e4af6e2a592f44c8ee195ff59b3178e60025f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff160217905550604051611b5c380380611b5c83398181016040528101906100799190610310565b335f806101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff1602179055508560015f6101000a81548173ffffffffffffffffffffffffffffffffffffffff021916908373ffffffffffffffffffffffffffffffffffffffff16021790555034600381905550846004908161010e91906105b9565b5083600581905550826006819055508160078190555080600881905550505050505050610688565b5f604051905090565b5f80fd5b5f80fd5b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f61017082610147565b9050919050565b61018081610166565b811461018a575f80fd5b50565b5f8151905061019b81610177565b92915050565b5f80fd5b5f80fd5b5f601f19601f8301169050919050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b6101ef826101a9565b810181811067ffffffffffffffff8211171561020e5761020d6101b9565b5b80604052505050565b5f610220610136565b905061022c82826101e6565b919050565b5f67ffffffffffffffff82111561024b5761024a6101b9565b5b610254826101a9565b9050602081019050919050565b8281835e5f83830152505050565b5f61028161027c84610231565b610217565b90508281526020810184848401111561029d5761029c6101a5565b5b6102a8848285610261565b509392505050565b5f82601f8301126102c4576102c36101a1565b5b81516102d484826020860161026f565b91505092915050565b5f819050919050565b6102ef816102dd565b81146102f9575f80fd5b50565b5f8151905061030a816102e6565b92915050565b5f805f805f8060c0878903121561032a5761032961013f565b5b5f61033789828a0161018d565b965050602087015167ffffffffffffffff81111561035857610357610143565b5b61036489828a016102b0565b955050604061037589828a016102fc565b945050606061038689828a016102fc565b935050608061039789828a016102fc565b92505060a06103a889828a016102fc565b9150509295509295509295565b5f81519050919050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602260045260245ffd5b5f600282049050600182168061040357607f821691505b602082108103610416576104156103bf565b5b50919050565b5f819050815f5260205f209050919050565b5f6020601f8301049050919050565b5f82821b905092915050565b5f600883026104787fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff8261043d565b610482868361043d565b95508019841693508086168417925050509392505050565b5f819050919050565b5f6104bd6104b86104b3846102dd565b61049a565b6102dd565b9050919050565b5f819050919050565b6104d6836104a3565b6104ea6104e2826104c4565b848454610449565b825550505050565b5f90565b6104fe6104f2565b6105098184846104cd565b505050565b5b8181101561052c576105215f826104f6565b60018101905061050f565b5050565b601f821115610571576105428161041c565b61054b8461042e565b8101602085101561055a578190505b61056e6105668561042e565b83018261050e565b50505b505050565b5f82821c905092915050565b5f6105915f1984600802610576565b1980831691505092915050565b5f6105a98383610582565b9150826002028217905092915050565b6105c2826103b5565b67ffffffffffffffff8111156105db576105da6101b9565b5b6105e582546103ec565b6105f0828285610530565b5f60209050601f831160018114610621575f841561060f578287015190505b610619858261059e565b865550610680565b601f19841661062f8661041c565b5f5b8281101561065657848901518255600182019150602085019450602081019050610631565b86831015610673578489015161066f601f891682610582565b8355505b6001600288020188555050505b505050505050565b6114c7806106955f395ff3fe6080604052600436106100f6575f3560e01c806391b7f5ed11610089578063bca7468d11610058578063bca7468d146103d1578063beb0a416146103fb578063cdc187c014610425578063d15e096e1461044d576101e1565b806391b7f5ed1461032d578063a035b1fe14610355578063a37dda2c1461037f578063a5585aa1146103a9576101e1565b806369668fe9116100c557806369668fe9146102875780637284e416146102b15780637ee0d3a6146102db57806390c3f38f14610305576101e1565b8063109e94cf146101e5578063224ac0bb1461020f5780633f43d89414610237578063576f71391461025f576101e1565b366101e1575f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614806101a0575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b6101df576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016101d690610db9565b60405180910390fd5b005b5f80fd5b3480156101f0575f80fd5b506101f9610477565b6040516102069190610e16565b60405180910390f35b34801561021a575f80fd5b5061023560048036038101906102309190610e73565b61049a565b005b348015610242575f80fd5b5061025d60048036038101906102589190610e73565b610588565b005b34801561026a575f80fd5b5061028560048036038101906102809190610e73565b610676565b005b348015610292575f80fd5b5061029b610764565b6040516102a89190610ead565b60405180910390f35b3480156102bc575f80fd5b506102c561076a565b6040516102d29190610f26565b60405180910390f35b3480156102e6575f80fd5b506102ef6107f6565b6040516102fc9190610ead565b60405180910390f35b348015610310575f80fd5b5061032b60048036038101906103269190611072565b6107fc565b005b348015610338575f80fd5b50610353600480360381019061034e9190610e73565b6108f3565b005b348015610360575f80fd5b506103696109e1565b6040516103769190610ead565b60405180910390f35b34801561038a575f80fd5b506103936109e7565b6040516103a09190610e16565b60405180910390f35b3480156103b4575f80fd5b506103cf60048036038101906103ca9190610e73565b610a0c565b005b3480156103dc575f80fd5b506103e5610afa565b6040516103f29190610ead565b60405180910390f35b348015610406575f80fd5b5061040f610b00565b60405161041c91906110d9565b60405180910390f35b348015610430575f80fd5b5061044b60048036038101906104469190610e73565b610b25565b005b348015610458575f80fd5b50610461610d33565b60405161046e9190610ead565b60405180910390f35b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16148061053f575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b61057e576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161057590610db9565b60405180910390fd5b8060088190555050565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16148061062d575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b61066c576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161066390610db9565b60405180910390fd5b8060058190555050565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16148061071b575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b61075a576040517f08c379a000000000000000000000000000000000000000000000000000000000815260040161075190610db9565b60405180910390fd5b8060068190555050565b60065481565b600480546107779061111f565b80601f01602080910402602001604051908101604052809291908181526020018280546107a39061111f565b80156107ee5780601f106107c5576101008083540402835291602001916107ee565b820191905f5260205f20905b8154815290600101906020018083116107d157829003601f168201915b505050505081565b60085481565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff1614806108a1575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b6108e0576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016108d790610db9565b60405180910390fd5b80600490816108ef91906112ec565b5050565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610998575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b6109d7576040517f08c379a00000000000000000000000000000000000000000000000000000000081526004016109ce90610db9565b60405180910390fd5b8060038190555050565b60035481565b60015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610ab1575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b610af0576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610ae790610db9565b60405180910390fd5b8060078190555050565b60075481565b60025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1681565b5f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff161480610bca575060025f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff163373ffffffffffffffffffffffffffffffffffffffff16145b610c09576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610c0090610db9565b60405180910390fd5b5f60085482610c1891906113e8565b905080471015610c5d576040517f08c379a0000000000000000000000000000000000000000000000000000000008152600401610c5490611473565b60405180910390fd5b5f8190505f8054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc8290811502906040515f60405180830381858888f19350505050158015610cc3573d5f803e3d5ffd5b505f47905060015f9054906101000a900473ffffffffffffffffffffffffffffffffffffffff1673ffffffffffffffffffffffffffffffffffffffff166108fc8290811502906040515f60405180830381858888f19350505050158015610d2c573d5f803e3d5ffd5b5050505050565b60055481565b5f82825260208201905092915050565b7f4f6e6c7920636c69656e74206f7220776562736974652063616e2063616c6c205f8201527f746869732066756e6374696f6e00000000000000000000000000000000000000602082015250565b5f610da3602d83610d39565b9150610dae82610d49565b604082019050919050565b5f6020820190508181035f830152610dd081610d97565b9050919050565b5f73ffffffffffffffffffffffffffffffffffffffff82169050919050565b5f610e0082610dd7565b9050919050565b610e1081610df6565b82525050565b5f602082019050610e295f830184610e07565b92915050565b5f604051905090565b5f80fd5b5f80fd5b5f819050919050565b610e5281610e40565b8114610e5c575f80fd5b50565b5f81359050610e6d81610e49565b92915050565b5f60208284031215610e8857610e87610e38565b5b5f610e9584828501610e5f565b91505092915050565b610ea781610e40565b82525050565b5f602082019050610ec05f830184610e9e565b92915050565b5f81519050919050565b8281835e5f83830152505050565b5f601f19601f8301169050919050565b5f610ef882610ec6565b610f028185610d39565b9350610f12818560208601610ed0565b610f1b81610ede565b840191505092915050565b5f6020820190508181035f830152610f3e8184610eee565b905092915050565b5f80fd5b5f80fd5b7f4e487b71000000000000000000000000000000000000000000000000000000005f52604160045260245ffd5b610f8482610ede565b810181811067ffffffffffffffff82111715610fa357610fa2610f4e565b5b80604052505050565b5f610fb5610e2f565b9050610fc18282610f7b565b919050565b5f67ffffffffffffffff821115610fe057610fdf610f4e565b5b610fe982610ede565b9050602081019050919050565b828183375f83830152505050565b5f61101661101184610fc6565b610fac565b90508281526020810184848401111561103257611031610f4a565b5b61103d848285610ff6565b509392505050565b5f82601f83011261105957611058610f46565b5b8135611069848260208601611004565b91505092915050565b5f6020828403121561108757611086610e38565b5b5f82013567ffffffffffffffff8111156110a4576110a3610e3c565b5b6110b084828501611045565b91505092915050565b5f6110c382610dd7565b9050919050565b6110d3816110b9565b82525050565b5f6020820190506110ec5f8301846110ca565b92915050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52602260045260245ffd5b5f600282049050600182168061113657607f821691505b602082108103611149576111486110f2565b5b50919050565b5f819050815f5260205f209050919050565b5f6020601f8301049050919050565b5f82821b905092915050565b5f600883026111ab7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff82611170565b6111b58683611170565b95508019841693508086168417925050509392505050565b5f819050919050565b5f6111f06111eb6111e684610e40565b6111cd565b610e40565b9050919050565b5f819050919050565b611209836111d6565b61121d611215826111f7565b84845461117c565b825550505050565b5f90565b611231611225565b61123c818484611200565b505050565b5b8181101561125f576112545f82611229565b600181019050611242565b5050565b601f8211156112a4576112758161114f565b61127e84611161565b8101602085101561128d578190505b6112a161129985611161565b830182611241565b50505b505050565b5f82821c905092915050565b5f6112c45f19846008026112a9565b1980831691505092915050565b5f6112dc83836112b5565b9150826002028217905092915050565b6112f582610ec6565b67ffffffffffffffff81111561130e5761130d610f4e565b5b611318825461111f565b611323828285611263565b5f60209050601f831160018114611354575f8415611342578287015190505b61134c85826112d1565b8655506113b3565b601f1984166113628661114f565b5f5b8281101561138957848901518255600182019150602085019450602081019050611364565b868310156113a657848901516113a2601f8916826112b5565b8355505b6001600288020188555050505b505050505050565b7f4e487b71000000000000000000000000000000000000000000000000000000005f52601160045260245ffd5b5f6113f282610e40565b91506113fd83610e40565b925082820261140b81610e40565b91508282048414831517611422576114216113bb565b5b5092915050565b7f496e73756666696369656e742066756e647320746f20636f7665722066696e655f82015250565b5f61145d602083610d39565b915061146882611429565b602082019050919050565b5f6020820190508181035f83015261148a81611451565b905091905056fea2646970667358221220dcad79934aef76f86ed0ec356dd4f5ea493f1a275ea2ab9a9ac6b9582c9ebf0c64736f6c63430008190033";
+    //             const contractABI = [
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "address payable",
+    //                             "name": "_freelancer",
+    //                             "type": "address"
+    //                         },
+    //                         {
+    //                             "internalType": "string",
+    //                             "name": "_description",
+    //                             "type": "string"
+    //                         },
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_revisions",
+    //                             "type": "uint256"
+    //                         },
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_deployDate",
+    //                             "type": "uint256"
+    //                         },
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_deliveryDate",
+    //                             "type": "uint256"
+    //                         },
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_finePerDay",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "payable",
+    //                     "type": "constructor"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "client",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "address payable",
+    //                             "name": "",
+    //                             "type": "address"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "deliveryDate",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "deployDate",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "description",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "string",
+    //                             "name": "",
+    //                             "type": "string"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_lateDays",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "distributeFine",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "finePerDay",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "freelancer",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "address payable",
+    //                             "name": "",
+    //                             "type": "address"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "price",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "revisions",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_deliveryDate",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "setDeliveryDate",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_deployDate",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "setDeployDate",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "string",
+    //                             "name": "_description",
+    //                             "type": "string"
+    //                         }
+    //                     ],
+    //                     "name": "setDescription",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_finePerDay",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "setFinePerDay",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_price",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "setPrice",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [
+    //                         {
+    //                             "internalType": "uint256",
+    //                             "name": "_revisions",
+    //                             "type": "uint256"
+    //                         }
+    //                     ],
+    //                     "name": "setRevisions",
+    //                     "outputs": [],
+    //                     "stateMutability": "nonpayable",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "inputs": [],
+    //                     "name": "website",
+    //                     "outputs": [
+    //                         {
+    //                             "internalType": "address",
+    //                             "name": "",
+    //                             "type": "address"
+    //                         }
+    //                     ],
+    //                     "stateMutability": "view",
+    //                     "type": "function"
+    //                 },
+    //                 {
+    //                     "stateMutability": "payable",
+    //                     "type": "receive"
+    //                 }
+    //             ];
+    
+    //             const contract = new web3.eth.Contract(contractABI);
+    
+    //             const deployedContract = await contract.deploy({
+    //                 data: contractBytecode,
+    //                 arguments: [_SellerId, _desc, 2, _createdAt, _deliveryTime, _price],
+    //             }).send({
+    //                 from: sender,
+    //                 gas: 3000000, // Adjust gas limit as needed
+    //             });
+    
+    //             console.log("Contract deployed at address:", deployedContract.options.address);
+    //         } else {
+    //             console.error("Web3 not found. Please install MetaMask.");
+    //         }
+    //     } catch (error) {
+    //         console.error("Failed to deploy contract:", error);
+    //     }
+    // }
+    const handleReject=async(order)=>{
+      
+        const sellerId = order.SellerId;
+        const buyerId = order.buyerId;
+        try {
+          
+            const id = sellerId +"-"+ buyerId;
+             await newRequest.get(`/confirm/data/${id}`);
+             // navigate(`/confirm`);
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                const res = await newRequest.post(`/conversations`, { to: currentUser.isSeller ? buyerId : sellerId });
+                navigate(`/message/${res.data.id}`);
+            }
+        }
+
+    }
+    const handleContact = async (order) => {
+
+        // callcontract();
+        const sellerId = order.SellerId;
+        const buyerId = order.buyerId;
+        // try {
+        //     const id = sellerId +"-"+ buyerId;
+        //      await newRequest.post(`/confirm/${id}`);
+        //       navigate(`/project`);
+        // } catch (error) {
+        //     if (error.response && error.response.status === 404) {
+        //         const res = await newRequest.post(`/conversations`, { to: currentUser.isSeller ? buyerId : sellerId });
+        //         navigate(`/message/${res.data.id}`);
+        //     }
+        // }
+       
+   const result12= findMatchingData(sellerId,buyerId);
+    
+    
+  const  valu=await callcontract(result12.Selleradress,result12.desc,result12.rivisonNumbers,result12.deliveryTime,result12.createdAt,result12.price,order.price);
+        try {
+         
+       
+            const id = sellerId +"-"+ buyerId+"-"+store;
+           if(valu===false){
+         
+
+           }
+           else{
+            const res = await newRequest.post(`/confirm/${id}`);
+            navigate(`/project`);
+           }
+       
+        } catch (error) {
+            if (error.response && error.response.status === 404) {
+                const res = await newRequest.post(`/conversations`, { to: currentUser.isSeller ? buyerId : sellerId });
+                navigate(`/message/${res.data.id}`);
+            }
+        }
+    };
+
+    return (
+        <div className="orders">
+            {isLoading ? "loading" : error ? `Error: ${error.message}` : <div className="container">
+                <div className="title">
+                    <h1>Propsel</h1>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>SellerName</th>
+                            <th>Title</th>
+                            <th>desc</th>
+                            <th>Date</th> 
+                            <th>confirm</th>
+                            <th>Reject</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {data && data.length > 0 ? data.map((order) => (
+                            <tr key={order._id}>
+                               
+                                <td>{order.Sellername}</td>
+                                <td>{order.price}</td>
+                                <td>{order.desc}</td>
+                                <td>{moment(order.createdAt).format('MMMM Do YYYY , h:mm:ss a')}</td>
+                                <td>
+                                <button onClick={() => handleContact(order)}>confirm--</button> 
+                                </td>
+                                <td>
+                                <button onClick={() => handleReject(order)}>Reject</button>      </td>
+                            </tr>
+                        )) : <tr><td colSpan="4">No orders found</td></tr>}
+                    </tbody>
+                </table>
+            </div>}
+        </div>
+    );
+}
+
+export default Orders;
